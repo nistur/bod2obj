@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 	    {
 		skipEmpty(bodfile, line);
 	    }
-
+	    
 	    float bodysize = (float)atoi(line.c_str());
 	    bodysize /= 5000;
 
@@ -116,7 +116,6 @@ int main(int argc, char** argv)
 		}
 		if( body.vertices.empty() )
 		{
-		    std::cout << line << std::endl;
 		    std::cerr << "Could not find vertices" << std::endl;
 		    return 1;
 		}
@@ -124,18 +123,25 @@ int main(int argc, char** argv)
 		
 		
 		triangle t;
-		while(createTriangle(line, t, 0))
+		while(true)
 		{
-		    body.triangles.push_back(t);
-		    skipEmpty(bodfile, line);
+		    while(createTriangle(line, t, 0))
+		    {
+			body.triangles.push_back(t);
+			skipEmpty(bodfile, line);
+		    }
+		    body.triangles.pop_back();
+		    if(skipEmpty(bodfile, line) && // end part
+		       skipEmpty(bodfile, line) ) // end body
+		    {
+			if(!createTriangle(line, t, 0))
+			{
+			    break;
+			}
+		    }
 		}
-		body.triangles.pop_back();
-		
-		
-		if(!skipEmpty(bodfile, line)|| // end part
-		   !skipEmpty(bodfile, line) || // end body
-		   !skipEmpty(bodfile, line) || // body size
-		   !skipEmpty(bodfile, line)) // next vertex
+		if(!skipEmpty(bodfile, line) || // body size
+			!skipEmpty(bodfile, line)) // next vertex
 		{
 		    // eof
 		}
