@@ -20,6 +20,7 @@ freely, subject to the following restrictions:
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <regex>
 #include <list>
 #include <exception>
@@ -119,7 +120,6 @@ int main(int argc, char** argv)
 		    std::cerr << "Could not find vertices" << std::endl;
 		    return 1;
 		}
-		body.vertices.pop_back();
 		
 		
 		triangle t;
@@ -216,7 +216,9 @@ bool createVertex(std::string line, vertex& vert)
 	coords.push_back(atoi(token.c_str()));
     }
     if((coords.size() != 3) ||
-       ( coords[0] == coords[1] == coords[2] == -1))
+       ( ( coords[0] == -1 ) &&
+	 ( coords[1] == -1 ) &&
+	 ( coords[2] == -1 ) ))
 	return false;
     vert.x = coords[0];
     vert.y = coords[1];
@@ -269,3 +271,4 @@ bool createTriangle(std::string line, triangle& tri, int indexStart)
     tri.v3 = indices[2];
     return true;
 }
+
