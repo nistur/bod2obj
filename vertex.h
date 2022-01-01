@@ -22,13 +22,14 @@
 
 #include <string>
 
+#include "object.h"
 #include "bod.h"
 
 /* Vertex
  * Represents a vertex in the model, just X,Y,Z plus a scale that is being applied to the 
  * whole model.
  */
-class Vertex : public BODObject<Vertex>
+class Vertex : public SharedObject<Vertex>, public BOD<Vertex>
 {
 public:
     Vertex();

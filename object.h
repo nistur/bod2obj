@@ -17,26 +17,38 @@
   misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#ifndef __TRIANGLE_H__
-#define __TRIANGLE_H__
+#ifndef __OBJECT_H__
+#define __OBJECT_H__
 
-#include "object.h"
-#include "bod.h"
+#include <memory>
 
-class Triangle : public SharedObject<Triangle>, public BOD<Triangle>
+template<typename base>
+class SharedObject
 {
 public:
-    Triangle();
-    virtual ~Triangle(){};
+    typedef std::shared_ptr<base> Ptr;
 
-    bool readBOD(std::string line);
-    bool writeBOD(std::string& line);
-
-    bool readOBJ(std::string line);
-    bool writeOBJ(std::string& line);
-
-//private:
-    int v1,v2,v3;
+    template<typename param>
+    static Ptr Create(std::string& line, param p)
+    {
+	Ptr object = std::make_shared<base>(p);
+	if(object->readBOD(line))
+	{
+	    return object;
+	}
+	return nullptr;
+    }
+    
+    static Ptr Create(std::string& line)
+    {
+	Ptr object = std::make_shared<base>();
+	if(object->readBOD(line))
+	{
+	    return object;
+	}
+	return nullptr;
+    }
 };
 
-#endif/*__TRIANGLE_H__*/
+
+#endif/*__OBJECT_H__*/

@@ -24,33 +24,10 @@
 #include <string>
 
 extern const std::string k_BODdelim;
+
 template<typename base>
-class BODObject
+class BOD
 {
-public:
-    typedef std::shared_ptr<base> Ptr;
-
-    template<typename param>
-    static Ptr Create(std::string& line, param p)
-    {
-	Ptr object = std::make_shared<base>(p);
-	if(object->readBOD(line))
-	{
-	    return object;
-	}
-	return nullptr;
-    }
-    
-    static Ptr Create(std::string& line)
-    {
-	Ptr object = std::make_shared<base>();
-	if(object->readBOD(line))
-	{
-	    return object;
-	}
-	return nullptr;
-    }
-
 protected:
     typedef struct
     {
