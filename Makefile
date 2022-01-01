@@ -5,7 +5,7 @@ OUTDIR=bin
 
 CFLAGS=-std=c++14 -g
 
-OBJS=${OBJDIR}/bod2obj.o ${OBJDIR}/vertex.o
+OBJS=${OBJDIR}/bod2obj.o ${OBJDIR}/vertex.o ${OBJDIR}/triangle.o ${OBJDIR}/bod.o
 
 .phony: all dir run
 

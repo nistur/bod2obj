@@ -1,21 +1,21 @@
 /*
-  Copyright (c) 2021 Philipp Geyer [Nistur]
+Copyright (c) 2021 Philipp Geyer [Nistur]
 
-  This software is provided 'as-is', without any express or implied
-  warranty. In no event will the authors be held liable for any damages
-  arising from the use of this software.
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
 
-  Permission is granted to anyone to use this software for any purpose,
-  including commercial applications, and to alter it and redistribute it
-  freely, subject to the following restrictions:
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
 
-  1. The origin of this software must not be misrepresented; you must not
-  claim that you wrote the original software. If you use this software
-  in a product, an acknowledgment in the product documentation would be
-  appreciated but is not required.
-  2. Altered source versions must be plainly marked as such, and must not be
-  misrepresented as being the original software.
-  3. This notice may not be removed or altered from any source distribution.
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
 */
 
 #include <iostream>
@@ -26,16 +26,11 @@
 #include <exception>
 
 #include "vertex.h"
-
-class triangle
-{
-public:
-    int v1, v2, v3;
-};
+#include "triangle.h"
 
 typedef std::list<Vertex::Ptr> vertexlist;
 typedef vertexlist::iterator vertIter;
-typedef std::list<triangle> trilist;
+typedef std::list<Triangle::Ptr> trilist;
 typedef trilist::iterator triIter;
 
 class body
@@ -52,7 +47,6 @@ typedef bodylist::iterator bodyIter;
 bodylist bodies;
 
 bool skipEmpty(std::ifstream& stream, std::string& line);
-bool createTriangle(std::string line, triangle& tri, int indexStart);
 
 int main(int argc, char** argv)
 {
@@ -86,66 +80,65 @@ int main(int argc, char** argv)
     {
 	while(std::count_if(line.begin(), line.end(), [](char c) { return c == ';'; }) != 1)
 	{
-	    skipEmpty(bodfile, line);
+		skipEmpty(bodfile, line);
 	}
 	
-	float bodysize = (float)atoi(line.c_str());
-	bodysize /= 5000;
+	    float bodysize = (float)atoi(line.c_str());
+	    bodysize /= 5000;
 
-	skipEmpty(bodfile, line);
+	    skipEmpty(bodfile, line);
 	    
-	scale /= 2000.f;
-	scale *= bodysize;
+	    scale /= 2000.f;
+	    scale *= bodysize;
 	    
-	int i = 0;
-	while(!bodfile.eof())
-	{
-	    body body;
-	    body.LOD = i;
-	    while(Vertex::Ptr vert = Vertex::Create(line, scale))
+	    int i = 0;
+	    while(!bodfile.eof())
 	    {
-		body.vertices.push_back(vert);
-		skipEmpty(bodfile, line);
-	    }
-	    if( body.vertices.empty() )
-	    {
-		std::cerr << "Could not find vertices" << std::endl;
-		return 1;
-	    }
-		
-		
-	    triangle t;
-	    while(true)
-	    {
-		while(createTriangle(line, t, 0))
+		body body;
+		body.LOD = i;
+		while(Vertex::Ptr vert = Vertex::Create(line, scale))
 		{
-		    body.triangles.push_back(t);
+		    body.vertices.push_back(vert);
 		    skipEmpty(bodfile, line);
 		}
-		if(skipEmpty(bodfile, line) && // end part
-		   skipEmpty(bodfile, line) ) // end body
+		if( body.vertices.empty() )
 		{
-		    if(!createTriangle(line, t, 0))
+		    std::cerr << "Could not find vertices" << std::endl;
+		    return 1;
+		}
+		
+	        
+		while(true)
+		{
+		    while(Triangle::Ptr tri = Triangle::Create(line))
 		    {
-			break;
+			body.triangles.push_back(tri);
+			skipEmpty(bodfile, line);
+		    }
+		    if(skipEmpty(bodfile, line) && // end part
+		       skipEmpty(bodfile, line) ) // end body
+		    {
+			if(Triangle::Create(line) == nullptr)
+			{
+			    break;
+			}
 		    }
 		}
-	    }
-	    if(!skipEmpty(bodfile, line) || // body size
-	       !skipEmpty(bodfile, line)) // next vertex
-	    {
-		// eof
-	    }
+		if(!skipEmpty(bodfile, line) || // body size
+			!skipEmpty(bodfile, line)) // next vertex
+		{
+		    // eof
+		}
 		
-	    std::cout << "Vertices: (" << i << ") " << body.vertices.size() << std::endl;
-	    std::cout << "Triangles: (" << i << ") " << body.triangles.size() << std::endl;
+		std::cout << "Vertices: (" << i << ") " << body.vertices.size() << std::endl;
+		std::cout << "Triangles: (" << i << ") " << body.triangles.size() << std::endl;
 		
-	    bodies.push_back(body);
-	    ++i;
-	}
+		bodies.push_back(body);
+		++i;
+	    }
 	    
-	bodfile.close();
-    }
+	    bodfile.close();
+	}
     
     for(bodyIter iBody = bodies.begin(); iBody != bodies.end(); ++iBody)
     {
@@ -164,10 +157,11 @@ int main(int argc, char** argv)
 	    }
 	    for(triIter iTri = iBody->triangles.begin(); iTri != iBody->triangles.end(); ++iTri)
 	    {
-		objfile << "f ";
-		objfile << 1+iTri->v1 << " ";
-		objfile << 1+iTri->v2 << " ";
-		objfile << 1+iTri->v3 << std::endl;
+		std::string line;
+		if((*iTri)->writeOBJ(line))
+		{
+		    objfile << line;
+		}
 	    }
 	    objfile.close();
 	}
@@ -188,48 +182,3 @@ bool skipEmpty(std::ifstream& stream, std::string& line)
     }
     return true;
 }
-
-bool createTriangle(std::string line, triangle& tri, int indexStart)
-{
-    std::regex comment_regex("/!.*!/");
-    line = std::regex_replace( line, comment_regex, "");
-
-    std::string delim = ";";
-    std::string token;
-    size_t pos = 0;
-    std::vector<int> indices;
-    int id = 0;
-    while((pos = line.find(delim)) != std::string::npos)
-    {
-	token = line.substr(0,pos);
-	line.erase(0, pos + delim.length());
-	int val = atoi(token.c_str());
-	if( id == 0 )
-	{
-	    if( val == -99)
-	    {
-		break;
-	    }
-	}
-	else if( id < 4 )
-	{
-	    indices.push_back(indexStart + val);
-	}
-	else
-	{
-	    // don't care about other info?
-	    break;
-	}
-	++id;
-    }
-    
-    if( indices.size() != 3 )
-    {
-	return false;
-    }
-    tri.v1 = indices[0];
-    tri.v2 = indices[1];
-    tri.v3 = indices[2];
-    return true;
-}
-
