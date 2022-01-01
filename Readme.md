@@ -13,8 +13,8 @@ need this. It seems fairly simple to add, but unless it's needed, I won't add it
 This has been tested running in msys2 on Windows 10, compiling with GCC 11.2.0. I make zero promises that it will work elsewhere.
 
 ```
-g++ -o bod2obj.exe bod2obj.cpp
-./bod2obj.exe path/to/argon_m3.bod ArgonNova
+make
+bin/bod2obj.exe path/to/argon_m3.bod ArgonNova
 ```
 
 This should give you four files in the current directory
