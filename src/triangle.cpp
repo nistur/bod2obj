@@ -61,12 +61,6 @@ bool Triangle::writeOBJ(std::string& line)
     // format is:
     // f v1 v2 v3
     // but indices are 1-indexed
-    
-    std::ostringstream tridata;
-    tridata << "f ";
-    tridata << 1+v1 << " ";
-    tridata << 1+v2 << " ";
-    tridata << 1+v3 << std::endl;
-    line = tridata.str();
-    return true;
+
+    return writeOBJArray<int>(OBJ::Type::Triangle, line, {1+v1,1+v2,1+v3});
 }

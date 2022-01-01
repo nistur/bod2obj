@@ -17,37 +17,39 @@
   misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#ifndef __VERTEX_H__
-#define __VERTEX_H__
+#ifndef __OBJ_H__
+#define __OBJ_H__
 
-#include <string>
+#include <vector>
+#include <sstream>
 
-#include "object.h"
-#include "bod.h"
-#include "obj.h"
-
-/* Vertex
- * Represents a vertex in the model, just X,Y,Z plus a scale that is being applied to the 
- * whole model.
- */
-class Vertex : public SharedObject<Vertex>, public BOD<Vertex>, public OBJ<Vertex>
+template<typename base>
+class OBJ
 {
-public:
-    Vertex();
-    Vertex(float scale);
-    virtual ~Vertex(){};
+protected:
+    enum Type
+    {
+	Vertex,
+	Triangle,
+    };
 
-    bool readBOD(std::string line);
-    bool writeBOD(std::string& line);
-
-    bool readOBJ(std::string line);
-    bool writeOBJ(std::string& line);
-    
-private:
-    float m_x, m_y, m_z;
-    
-    bool m_isValid;
-    float m_scale;
+    template<typename type>
+    bool writeOBJArray(Type t, std::string& line, std::vector<type> dat)
+    {
+	if( dat.size() <= 0 )
+	{
+	    return false;
+	}
+	std::ostringstream tridata;
+	tridata << (t == Vertex ? "v " : "f ") ;
+	for(int i = 0; i < dat.size() - 1; ++i)
+	{
+	    tridata << dat[i] << " ";
+	}
+	tridata << dat[dat.size() - 1] << std::endl;
+	line = tridata.str();
+	return true;
+    }
 };
 
-#endif/*__VERTEX_H__*/
+#endif/*__OBJ_H__*/

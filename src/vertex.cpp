@@ -80,12 +80,6 @@ bool Vertex::writeOBJ(std::string& line)
     // v x y z
     // but apply model scale - this is originally to match
     // the exported model from gmax, but seems fairly arbitrary
-    
-    std::ostringstream vertdata;
-    vertdata << "v ";
-    vertdata << ((float)m_x)*m_scale << " ";
-    vertdata << ((float)m_y)*m_scale << " ";
-    vertdata << ((float)m_z)*m_scale << std::endl;
-    line = vertdata.str();
-    return true;
+
+    return writeOBJArray<float>(OBJ::Type::Vertex, line, {m_x*m_scale, m_y*m_scale, m_z*m_scale});
 }

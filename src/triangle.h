@@ -22,8 +22,9 @@
 
 #include "object.h"
 #include "bod.h"
+#include "obj.h"
 
-class Triangle : public SharedObject<Triangle>, public BOD<Triangle>
+class Triangle : public SharedObject<Triangle>, public BOD<Triangle>, public OBJ<Triangle>
 {
 public:
     Triangle();
