@@ -1,21 +1,21 @@
 /*
-Copyright (c) 2021 Philipp Geyer [Nistur]
+  Copyright (c) 2021 Philipp Geyer [Nistur]
 
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
+  This software is provided 'as-is', without any express or implied
+  warranty. In no event will the authors be held liable for any damages
+  arising from the use of this software.
 
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
 
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgment in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution.
+  1. The origin of this software must not be misrepresented; you must not
+  claim that you wrote the original software. If you use this software
+  in a product, an acknowledgment in the product documentation would be
+  appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+  misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
 */
 
 #include <iostream>
@@ -25,11 +25,7 @@ freely, subject to the following restrictions:
 #include <list>
 #include <exception>
 
-class vertex
-{
-public:
-    int x, y, z;
-};
+#include "vertex.h"
 
 class triangle
 {
@@ -37,7 +33,7 @@ public:
     int v1, v2, v3;
 };
 
-typedef std::list<vertex> vertexlist;
+typedef std::list<Vertex::Ptr> vertexlist;
 typedef vertexlist::iterator vertIter;
 typedef std::list<triangle> trilist;
 typedef trilist::iterator triIter;
@@ -56,7 +52,6 @@ typedef bodylist::iterator bodyIter;
 bodylist bodies;
 
 bool skipEmpty(std::ifstream& stream, std::string& line);
-bool createVertex(std::string line, vertex& vert);
 bool createTriangle(std::string line, triangle& tri, int indexStart);
 
 int main(int argc, char** argv)
@@ -83,83 +78,73 @@ int main(int argc, char** argv)
 	outfile = infile.substr(0,infile.find_last_of("."));
     }
     std::cout << "Converting " << infile << " (" << outfile << ")" << std::endl;
-
-
-    try
+    
+    
+    std::ifstream bodfile (infile);
+    
+    if(bodfile.is_open())
     {
-	std::ifstream bodfile (infile);
-	
-	if(bodfile.is_open())
+	while(std::count_if(line.begin(), line.end(), [](char c) { return c == ';'; }) != 1)
 	{
-	    while(std::count_if(line.begin(), line.end(), [](char c) { return c == ';'; }) != 1)
+	    skipEmpty(bodfile, line);
+	}
+	
+	float bodysize = (float)atoi(line.c_str());
+	bodysize /= 5000;
+
+	skipEmpty(bodfile, line);
+	    
+	scale /= 2000.f;
+	scale *= bodysize;
+	    
+	int i = 0;
+	while(!bodfile.eof())
+	{
+	    body body;
+	    body.LOD = i;
+	    while(Vertex::Ptr vert = Vertex::Create(line, scale))
 	    {
+		body.vertices.push_back(vert);
 		skipEmpty(bodfile, line);
 	    }
-	    
-	    float bodysize = (float)atoi(line.c_str());
-	    bodysize /= 5000;
-
-	    skipEmpty(bodfile, line);
-	    
-	    scale /= 2000.f;
-	    scale *= bodysize;
-	    
-	    int i = 0;
-	    while(!bodfile.eof())
+	    if( body.vertices.empty() )
 	    {
-		body body;
-		body.LOD = i;
-		vertex v;
-		while(createVertex(line, v))
+		std::cerr << "Could not find vertices" << std::endl;
+		return 1;
+	    }
+		
+		
+	    triangle t;
+	    while(true)
+	    {
+		while(createTriangle(line, t, 0))
 		{
-		    body.vertices.push_back(v);
+		    body.triangles.push_back(t);
 		    skipEmpty(bodfile, line);
 		}
-		if( body.vertices.empty() )
+		if(skipEmpty(bodfile, line) && // end part
+		   skipEmpty(bodfile, line) ) // end body
 		{
-		    std::cerr << "Could not find vertices" << std::endl;
-		    return 1;
-		}
-		
-		
-		triangle t;
-		while(true)
-		{
-		    while(createTriangle(line, t, 0))
+		    if(!createTriangle(line, t, 0))
 		    {
-			body.triangles.push_back(t);
-			skipEmpty(bodfile, line);
-		    }
-		    body.triangles.pop_back();
-		    if(skipEmpty(bodfile, line) && // end part
-		       skipEmpty(bodfile, line) ) // end body
-		    {
-			if(!createTriangle(line, t, 0))
-			{
-			    break;
-			}
+			break;
 		    }
 		}
-		if(!skipEmpty(bodfile, line) || // body size
-			!skipEmpty(bodfile, line)) // next vertex
-		{
-		    // eof
-		}
-		
-		std::cout << "Vertices: (" << i << ") " << body.vertices.size() << std::endl;
-		std::cout << "Triangles: (" << i << ") " << body.triangles.size() << std::endl;
-		
-		bodies.push_back(body);
-		++i;
 	    }
-	    
-	    bodfile.close();
+	    if(!skipEmpty(bodfile, line) || // body size
+	       !skipEmpty(bodfile, line)) // next vertex
+	    {
+		// eof
+	    }
+		
+	    std::cout << "Vertices: (" << i << ") " << body.vertices.size() << std::endl;
+	    std::cout << "Triangles: (" << i << ") " << body.triangles.size() << std::endl;
+		
+	    bodies.push_back(body);
+	    ++i;
 	}
-    }
-    catch( std::exception e)
-    {
-	std::cerr << e.what() << std::endl;
-	return 0;
+	    
+	bodfile.close();
     }
     
     for(bodyIter iBody = bodies.begin(); iBody != bodies.end(); ++iBody)
@@ -171,10 +156,11 @@ int main(int argc, char** argv)
 	{
 	    for(vertIter iVert = iBody->vertices.begin(); iVert != iBody->vertices.end(); ++iVert)
 	    {
-		objfile << "v ";
-		objfile << ((float)iVert->x)*scale << " ";
-		objfile << ((float)iVert->y)*scale << " ";
-		objfile << ((float)iVert->z)*scale << std::endl;
+		std::string line;
+		if((*iVert)->writeOBJ(line))
+		{
+		    objfile << line;
+		}
 	    }
 	    for(triIter iTri = iBody->triangles.begin(); iTri != iBody->triangles.end(); ++iTri)
 	    {
@@ -202,31 +188,6 @@ bool skipEmpty(std::ifstream& stream, std::string& line)
     }
     return true;
 }
-
-bool createVertex(std::string line, vertex& vert)
-{
-    std::string delim = ";";
-    std::string token;
-    size_t pos = 0;
-    std::vector<int> coords;
-    while((pos = line.find(delim)) != std::string::npos)
-    {
-	token = line.substr(0,pos);
-	line.erase(0, pos + delim.length());
-	coords.push_back(atoi(token.c_str()));
-    }
-    if((coords.size() != 3) ||
-       ( ( coords[0] == -1 ) &&
-	 ( coords[1] == -1 ) &&
-	 ( coords[2] == -1 ) ))
-	return false;
-    vert.x = coords[0];
-    vert.y = coords[1];
-    vert.z = coords[2];
-    return true;
-}
-
-
 
 bool createTriangle(std::string line, triangle& tri, int indexStart)
 {
