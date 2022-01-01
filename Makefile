@@ -1,5 +1,6 @@
 TARGET=bod2obj
 
+SRCDIR=src
 OBJDIR=obj
 OUTDIR=bin
 
@@ -14,7 +15,7 @@ all: dir ${OUTDIR}/${TARGET}
 ${OUTDIR}/${TARGET}: ${OBJS}
 	g++ -o ${OUTDIR}/${TARGET} ${OBJS} ${CFLAGS}
 
-${OBJDIR}/%.o:%.cpp
+${OBJDIR}/%.o:${SRCDIR}/%.cpp
 	g++ -o $@ $< -c ${CFLAGS}
 
 dir:
