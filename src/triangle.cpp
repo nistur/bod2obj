@@ -26,6 +26,12 @@ Triangle::Triangle()
 {
 }
 
+Triangle::Triangle(int v1, int v2, int v3)
+    : v1(v1)
+    , v2(v2)
+    , v3(v3)
+{}
+
 bool Triangle::readBOD(std::string line)
 {
     std::regex comment_regex("/!.*!/");
@@ -62,5 +68,5 @@ bool Triangle::writeOBJ(std::string& line)
     // f v1 v2 v3
     // but indices are 1-indexed
 
-    return writeOBJArray<int>(OBJ::Type::Triangle, line, {1+v1,1+v2,1+v3});
+    return writeOBJArray<int>(Type::Triangle, line, {1+v1,1+v2,1+v3});
 }

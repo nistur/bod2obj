@@ -23,18 +23,19 @@
 #include <string>
 
 #include "object.h"
-#include "bod.h"
-#include "obj.h"
+//#include "bod.h"
+//#include "obj.h"
 
 /* Vertex
  * Represents a vertex in the model, just X,Y,Z plus a scale that is being applied to the 
  * whole model.
  */
-class Vertex : public SharedObject<Vertex>, public BOD<Vertex>, public OBJ<Vertex>
+class Vertex : public SharedObject<Vertex>//, public BOD<Vertex>, public OBJ<Vertex>
 {
 public:
     Vertex();
     Vertex(float scale);
+    Vertex(float x, float y, float z);
     virtual ~Vertex(){};
 
     bool readBOD(std::string line);

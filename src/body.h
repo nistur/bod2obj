@@ -17,28 +17,27 @@
   misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#ifndef __TRIANGLE_H__
-#define __TRIANGLE_H__
+
+#ifndef __BODY_H__
+#define __BODY_H__
 
 #include "object.h"
-//#include "bod.h"
-//#include "obj.h"
+#include "vertex.h"
+#include "triangle.h"
 
-class Triangle : public SharedObject<Triangle>//, public BOD<Triangle>, public OBJ<Triangle>
+#include <list>
+
+class Body : public SharedObject<Body>
 {
 public:
-    Triangle();
-    Triangle(int v1, int v2, int v3);
-    virtual ~Triangle(){};
+    typedef std::list<Vertex::Ptr> vertexlist;
+    typedef vertexlist::iterator vertIter;
+    typedef std::list<Triangle::Ptr> trilist;
+    typedef trilist::iterator triIter;
 
-    bool readBOD(std::string line);
-    bool writeBOD(std::string& line);
-
-    bool readOBJ(std::string line);
-    bool writeOBJ(std::string& line);
-
-//private:
-    int v1,v2,v3;
+    vertexlist vertices;
+    trilist triangles;
+    int LOD;
 };
 
-#endif/*__TRIANGLE_H__*/
+#endif/*__BODY_H__*/

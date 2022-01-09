@@ -27,21 +27,11 @@ freely, subject to the following restrictions:
 
 #include "vertex.h"
 #include "triangle.h"
+#include "body.h"
 
-typedef std::list<Vertex::Ptr> vertexlist;
-typedef vertexlist::iterator vertIter;
-typedef std::list<Triangle::Ptr> trilist;
-typedef trilist::iterator triIter;
+#include "bod.h"
 
-class body
-{
-public:
-    vertexlist vertices;
-    trilist triangles;
-    int LOD;
-};
-
-typedef std::list<body> bodylist;
+typedef std::list<Body::Ptr> bodylist;
 typedef bodylist::iterator bodyIter;
 
 bodylist bodies;
@@ -72,82 +62,31 @@ int main(int argc, char** argv)
 	outfile = infile.substr(0,infile.find_last_of("."));
     }
     std::cout << "Converting " << infile << " (" << outfile << ")" << std::endl;
-    
-    
-    std::ifstream bodfile (infile);
-    
-    if(bodfile.is_open())
-    {
-	while(std::count_if(line.begin(), line.end(), [](char c) { return c == ';'; }) != 1)
-	{
-		skipEmpty(bodfile, line);
-	}
-	
-	    float bodysize = (float)atoi(line.c_str());
-	    bodysize /= 5000;
 
-	    skipEmpty(bodfile, line);
-	    
-	    scale /= 2000.f;
-	    scale *= bodysize;
-	    
-	    int i = 0;
-	    while(!bodfile.eof())
-	    {
-		body body;
-		body.LOD = i;
-		while(Vertex::Ptr vert = Vertex::Create(line, scale))
-		{
-		    body.vertices.push_back(vert);
-		    skipEmpty(bodfile, line);
-		}
-		if( body.vertices.empty() )
-		{
-		    std::cerr << "Could not find vertices" << std::endl;
-		    return 1;
-		}
-		
-	        
-		while(true)
-		{
-		    while(Triangle::Ptr tri = Triangle::Create(line))
-		    {
-			body.triangles.push_back(tri);
-			skipEmpty(bodfile, line);
-		    }
-		    if(skipEmpty(bodfile, line) && // end part
-		       skipEmpty(bodfile, line) ) // end body
-		    {
-			if(Triangle::Create(line) == nullptr)
-			{
-			    break;
-			}
-		    }
-		}
-		if(!skipEmpty(bodfile, line) || // body size
-			!skipEmpty(bodfile, line)) // next vertex
-		{
-		    // eof
-		}
-		
-		std::cout << "Vertices: (" << i << ") " << body.vertices.size() << std::endl;
-		std::cout << "Triangles: (" << i << ") " << body.triangles.size() << std::endl;
-		
-		bodies.push_back(body);
-		++i;
-	    }
-	    
-	    bodfile.close();
-	}
+    std::ifstream bodfile(infile);
+    BOD bod;
+    int i = 0;
+//    while(!bodfile.eof())
+    {
+	printf("Reading LOD %d\n", i);
+	Body::Ptr testbody = Body::Create();
+	testbody->LOD = i;
+	bod.Read(testbody, bodfile);
+	bodies.push_back(testbody);
+	++i;
+    }
+
     
     for(bodyIter iBody = bodies.begin(); iBody != bodies.end(); ++iBody)
     {
 	std::ostringstream filename;
-	filename << outfile << "_LOD" << iBody->LOD << ".obj";
+	filename << outfile << "_LOD" << (*iBody)->LOD << ".obj";
 	std::ofstream objfile(filename.str(), std::ios::trunc);
+
+	printf("Writing %s (%lu/%lu)\n", filename.str().c_str(), (*iBody)->vertices.size(), (*iBody)->triangles.size());
 	if(objfile.is_open())
 	{
-	    for(vertIter iVert = iBody->vertices.begin(); iVert != iBody->vertices.end(); ++iVert)
+	    for(auto iVert = (*iBody)->vertices.begin(); iVert != (*iBody)->vertices.end(); ++iVert)
 	    {
 		std::string line;
 		if((*iVert)->writeOBJ(line))
@@ -155,7 +94,7 @@ int main(int argc, char** argv)
 		    objfile << line;
 		}
 	    }
-	    for(triIter iTri = iBody->triangles.begin(); iTri != iBody->triangles.end(); ++iTri)
+	    for(auto iTri = (*iBody)->triangles.begin(); iTri != (*iBody)->triangles.end(); ++iTri)
 	    {
 		std::string line;
 		if((*iTri)->writeOBJ(line))

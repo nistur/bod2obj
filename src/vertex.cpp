@@ -40,6 +40,14 @@ Vertex::Vertex(float scale)
 {
 }
 
+Vertex::Vertex(float x, float y, float z)
+    : m_x(x)
+    , m_y(y)
+    , m_z(z)
+    , m_scale(1)
+    , m_isValid(true)
+{
+}
 
 bool Vertex::readBOD(std::string line)
 {
@@ -81,5 +89,5 @@ bool Vertex::writeOBJ(std::string& line)
     // but apply model scale - this is originally to match
     // the exported model from gmax, but seems fairly arbitrary
 
-    return writeOBJArray<float>(OBJ::Type::Vertex, line, {m_x*m_scale, m_y*m_scale, m_z*m_scale});
+    return writeOBJArray<float>(Type::Vertex, line, {m_x*m_scale, m_y*m_scale, m_z*m_scale});
 }

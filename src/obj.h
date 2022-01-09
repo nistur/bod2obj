@@ -21,35 +21,16 @@
 #define __OBJ_H__
 
 #include <vector>
-#include <sstream>
+#include "object.h"
+#include "model.h"
 
-template<typename base>
-class OBJ
+class OBJ : public Model
 {
-protected:
-    enum Type
-    {
-	Vertex,
-	Triangle,
-    };
-
-    template<typename type>
-    bool writeOBJArray(Type t, std::string& line, std::vector<type> dat)
-    {
-	if( dat.size() <= 0 )
-	{
-	    return false;
-	}
-	std::ostringstream tridata;
-	tridata << (t == Vertex ? "v " : "f ") ;
-	for(int i = 0; i < dat.size() - 1; ++i)
-	{
-	    tridata << dat[i] << " ";
-	}
-	tridata << dat[dat.size() - 1] << std::endl;
-	line = tridata.str();
-	return true;
-    }
+public:
+    OBJ();
+    virtual ~OBJ(){}
+    void Read(Body::Ptr body, std::ifstream& file);
+    void Write(Body::Ptr body, std::ofstream& file);
 };
 
 #endif/*__OBJ_H__*/

@@ -4,9 +4,10 @@ SRCDIR=src
 OBJDIR=obj
 OUTDIR=bin
 
-CFLAGS=-std=c++14 -g
+CFLAGS=-std=c++14 -O3
 
-OBJS=${OBJDIR}/bod2obj.o ${OBJDIR}/vertex.o ${OBJDIR}/triangle.o ${OBJDIR}/bod.o
+OBJS:=$(patsubst %.cpp,%.o,$(wildcard src/*.cpp))
+OBJS:=$(subst ${SRCDIR},${OBJDIR},${OBJS})
 
 .phony: all dir run
 

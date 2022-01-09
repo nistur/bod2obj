@@ -20,67 +20,27 @@
 #ifndef __BOD_H__
 #define __BOD_H__
 
-#include <vector>
-#include <string>
+#include "body.h"
+#include "model.h"
 
-extern const std::string k_BODdelim;
-
-template<typename base>
-class BOD
+class BOD : Model
 {
-protected:
-    typedef struct
-    {
-    public:
-	int intVal;
-	float floatVal;
-	std::string strVal;
-    } MixedType;
-    
-    typedef std::vector<int> intVec;
-    typedef std::shared_ptr<intVec> intVecPtr;
-    typedef std::vector<MixedType> mixVec;
-    typedef std::shared_ptr<mixVec> mixVecPtr;
+public:
+    BOD();
+    virtual ~BOD(){}
+    void Read(Body::Ptr body, std::ifstream& file);
+    void Write(Body::Ptr body, std::ofstream& file);
 
-    
-    intVecPtr readBODInts(std::string line, size_t capacity = 0)
+private:
+    typedef enum
     {
-	intVecPtr ints = std::make_shared<intVec>();
-	if(capacity > 0)
-	{
-	    ints->reserve(capacity);
-	}
-	size_t pos = 0;
-	while((pos = line.find(k_BODdelim)) != std::string::npos)
-	{
-	    ints->push_back(atoi(line.substr(0,pos).c_str()));
-	    line.erase(0, pos + k_BODdelim.length());
-	}
-
-	return ints;
-    }
+	BODY_SIZE,
+	VERTICES,
+	TRIANGLES,
+	END,
+    } Section;
     
-    mixVecPtr readBODMixed(std::string line, size_t capacity = 0)
-    {
-	mixVecPtr dat = std::make_shared<mixVec>();
-	if(capacity > 0)
-	{
-	    dat->reserve(capacity);
-	}
-	
-	size_t pos = 0;
-	while((pos = line.find(k_BODdelim)) != std::string::npos)
-	{
-	    MixedType type;
-	    type.strVal = line.substr(0,pos);
-	    type.intVal = atoi(type.strVal.c_str());
-	    type.floatVal = atof(type.strVal.c_str());
-	    dat->push_back(type);
-	    
-	    line.erase(0, pos + k_BODdelim.length());
-	}
-	return dat;
-    }
+    std::string NextToken(std::ifstream& file);
 };
 
 #endif/*__BOD_H__*/
