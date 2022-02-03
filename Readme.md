@@ -1,14 +1,24 @@
 ## Quick and dirty tool to convert X3 .bod files to OBJ for 3D printing.
 
-No, really, it is probably the worst code I've ever written. Don't judge me on this please.
-I may tidy it up and make it a nice tool.
+~~No, really, it is probably the worst code I've ever written. Don't judge me on this please.
+I may tidy it up and make it a nice tool.~~ __I have since tidied the
+code up a little. It's still not my best code, but it's at least not
+quite as offensive. I'm quite happy with the general architecture and
+design, even if there are still some crusty leftover bits from my
+initial file format experiments. Also, currently lacking comments...__
 
-It currently doesn't support something in some ships, and will just fail on ships like the Colossus.
+~~It currently doesn't support something in some ships, and will just fail on ships like the Colossus.~~
 It also doesn't yet support scene files, so larger ships won't have their hangers etc.
-Both of these are things that will be fixed.
+Both of these are things that will be fixed. __I have fixed the reason
+that it was failing on some ships, which was that apparently they were
+multi-part, where my original code assumed only one part and had zero
+error checking. Still haven't parsed scene files yet though.__
 
 It doesn't support exporting normals, texture data, collision volumes, or anything other than pure geometry, as I currently don't
-need this. It seems fairly simple to add, but unless it's needed, I won't add it.
+need this. It seems fairly simple to add, but unless it's needed, I
+won't add it. __This is a slight lie. I don't need it, but retrieving
+some of this data is trivial, so I do extract it, even if I don't do
+anything with it right now.__
 
 This has been tested running in msys2 on Windows 10, compiling with GCC 11.2.0. I make zero promises that it will work elsewhere.
 
@@ -45,4 +55,6 @@ And will output `Argon/M4_Elite_LOD0.obj` etc given that it is run in a director
 
 This project was born out of the frustration of trying to export models via gmax, which is slow and has... issues.
 
-Again, final disclaimer, it is absolutely terrible code. I was quickly hacking it together just to try to reverse engineer the format.
+~~Again, final disclaimer, it is absolutely terrible code. I was
+quickly hacking it together just to try to reverse engineer the
+format.~~
