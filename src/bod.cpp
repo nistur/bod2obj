@@ -77,7 +77,7 @@ void BOD::Read(Body::Ptr body, std::ifstream& file)
 	    {
 		auto token = NextToken(file);
 	        int section = atoi(token.c_str());
-		if(section == 0 )
+//		if(section == 0 )
 		{
 		    currentSection = END;
 		}
@@ -131,7 +131,7 @@ std::string BOD::NextToken(std::ifstream& file)
     std::string line;
 
     bool in_block = false;
-    while(line.size() == 0)
+    while(line.size() == 0 && !file.eof())
     {
 	std::getline(file, line, ';');
 	std::regex comment_regex("//.*");
