@@ -35,7 +35,6 @@ public:
     bool writeBOD(std::string& line);
 
     bool readOBJ(std::string line);
-    bool writeOBJ(std::string& line);
 
 //private:
     int v1,v2,v3;

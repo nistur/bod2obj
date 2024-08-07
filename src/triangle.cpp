@@ -60,13 +60,3 @@ bool Triangle::readOBJ(std::string line)
 {
     return false;
 }
-
-bool Triangle::writeOBJ(std::string& line)
-{
-
-    // format is:
-    // f v1 v2 v3
-    // but indices are 1-indexed
-
-    return writeOBJArray<int>(Type::Triangle, line, {1+v1,1+v2,1+v3});
-}

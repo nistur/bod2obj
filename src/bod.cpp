@@ -22,6 +22,7 @@
 #include <iostream>
 #include <regex>
 #include <csignal>
+#include <limits>
 
 BOD::BOD(){}
 
@@ -40,8 +41,9 @@ void BOD::Read(Body::Ptr body, std::ifstream& file)
     
     int i = 0;
 
-    float scale = 1;
-    scale /= 2000.f;
+    float scale = 0.00000002f;
+    float min[] = {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
+    float max[] = {std::numeric_limits<float>::min(),std::numeric_limits<float>::min(),std::numeric_limits<float>::min()};
     while(currentSection != END)
     {
 	switch(currentSection)
@@ -49,7 +51,6 @@ void BOD::Read(Body::Ptr body, std::ifstream& file)
 	case BODY_SIZE:
 	{
 	    float bodysize = atof(NextToken(file).c_str());
-	    bodysize /= 5000.f;
 	    scale *= bodysize;
 	    currentSection = VERTICES;
 	    break;
@@ -66,7 +67,16 @@ void BOD::Read(Body::Ptr body, std::ifstream& file)
 	    }
 	    else
 	    {
-		body->vertices.push_back(Vertex::Create(x*scale, y*scale, z*scale));
+		x*=scale; y*=scale; z*=scale;
+		body->vertices.push_back(Vertex::Create(x,y,z));
+		if(x<min[0]) min[0]=x;
+		if(x>max[0]) max[0]=x;
+		
+		if(y<min[1]) min[1]=y;
+		if(y>max[1]) max[1]=y;
+		
+		if(z<min[2]) min[2]=z;
+		if(z>max[2]) max[2]=z;
 	    }
 	    break;
 	}
@@ -119,6 +129,7 @@ void BOD::Read(Body::Ptr body, std::ifstream& file)
 	{}
 	}
     }
+	printf("Size: %.2f x %.2f x %.2f\n", max[0]-min[0], max[1] - min[1], max[2] - min[2]);
 }
 
 void BOD::Write(Body::Ptr body, std::ofstream& file)

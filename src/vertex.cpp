@@ -76,18 +76,3 @@ bool Vertex::readOBJ(std::string line)
 {
     return false;
 }
-
-bool Vertex::writeOBJ(std::string& line)
-{
-    if( !m_isValid)
-    {
-	return false;
-    }
-
-    // format is:
-    // v x y z
-    // but apply model scale - this is originally to match
-    // the exported model from gmax, but seems fairly arbitrary
-
-    return writeOBJArray<float>(Type::Vertex, line, {m_x*m_scale, m_y*m_scale, m_z*m_scale});
-}

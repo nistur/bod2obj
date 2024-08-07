@@ -29,6 +29,7 @@ freely, subject to the following restrictions:
 #include "triangle.h"
 #include "body.h"
 
+#include "obj.h"
 #include "bod.h"
 
 typedef std::list<Body::Ptr> bodylist;
@@ -66,7 +67,7 @@ int main(int argc, char** argv)
     std::ifstream bodfile(infile);
     BOD bod;
     int i = 0;
-//    while(!bodfile.eof())
+    //while(!bodfile.eof())
     {
 	printf("Reading LOD %d\n", i);
 	Body::Ptr testbody = Body::Create();
@@ -86,22 +87,8 @@ int main(int argc, char** argv)
 	printf("Writing %s (%lu/%lu)\n", filename.str().c_str(), (*iBody)->vertices.size(), (*iBody)->triangles.size());
 	if(objfile.is_open())
 	{
-	    for(auto iVert = (*iBody)->vertices.begin(); iVert != (*iBody)->vertices.end(); ++iVert)
-	    {
-		std::string line;
-		if((*iVert)->writeOBJ(line))
-		{
-		    objfile << line;
-		}
-	    }
-	    for(auto iTri = (*iBody)->triangles.begin(); iTri != (*iBody)->triangles.end(); ++iTri)
-	    {
-		std::string line;
-		if((*iTri)->writeOBJ(line))
-		{
-		    objfile << line;
-		}
-	    }
+	    OBJ obj;
+	    obj.Write(*iBody, objfile);
 	    objfile.close();
 	}
     }

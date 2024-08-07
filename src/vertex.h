@@ -42,7 +42,10 @@ public:
     bool writeBOD(std::string& line);
 
     bool readOBJ(std::string line);
-    bool writeOBJ(std::string& line);
+
+    float X() { return m_x; }
+    float Y() { return m_y; }
+    float Z() { return m_z; }
     
 private:
     float m_x, m_y, m_z;
